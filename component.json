@@ -1,9 +1,8 @@
 {
-  "name": "fit-checker-edux.api.js",
-  "version": "0.1.0",
-  "main": "./edux.api.js",
-  "dependencies": {
-    "jquery": "1.9.*",
-    "common-assets": "git://github.com/FIT-Checker/common-assets.git"
-  }
+	"name": "fit-checker-edux.api.js",
+	"version": "0.1.0",
+	"main": "./edux.api.js",
+	"dependencies": {
+		"jquery": "1.9.*",
+	}
 }
