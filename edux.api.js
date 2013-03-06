@@ -1,5 +1,3 @@
-(function($, undefined) {
-
 if (typeof $ != 'function') {
 	return console.error('fitChecker.js: jQuery is missing, please load it.');
 }
@@ -9,14 +7,14 @@ $.expr[':'].contentIs = function(el, idx, meta) {
     return $(el).text() === meta[3];
 };
 
-var fitChecker = function () {
+var fitChecker = {
 	/** Inner data */
-	var inner = {
+	inner: {
 		baseUrl: 'https://edux.fit.cvut.cz',
 		username: null,
 		trackEnabled: true,
-		courses: {}
-	};
+		courses: []
+	},
 
 	/**
 	 * Loads subjects from edux.
@@ -24,36 +22,45 @@ var fitChecker = function () {
 	 * @param function success Success AJAX callback
 	 * @param function error Error AJAX callback
 	 */
-	this.getSubjectsFromEdux = function(success, error) {
+	getSubjectsFromEdux: function(success, error) {
 		$.ajax({
 			timeout: 10000,
 			async: true,
 			type: 'POST',
+			converters: {
+				"text html": jQuery.parseJSON
+			},
 			url: fitChecker.inner.baseUrl + '/lib/exe/ajax.php?dashboard_current_lang=cs',
 			data: {
-				call: dashboard_widget_update,
-				widget_real_id: w_actual_courses_fit,
+				call: 'dashboard_widget_update',
+				widget_real_id: 'w_actual_courses_fit',
 				widget_max: 0,
 				lazy: 1
 			},
 			success: function(response) {
-				var name;
-				var username = $.trim($("div.user", response).text()
-					.replace(/.*\(([a-z0-9]*)\).*/, "$1"));
-
-				var courses = $("a[href^=/courses/]", response);
+				// Check success
+				if (!response.success) {
+					if (error) {
+						error("Cannot load subject list.");
+					}
+				}
+				// Transform response to DOM
+				var html = $(document.createElement('div'));
+				html.append(response.widget_content);
+				// Parse courses
+				var courses = html.find('a[href*="/courses/"]');
 				if (courses.length <= 0) {
 					if (error) {
 						error("No subjects found.");
 					}
 				} else {
 					courses.each(function(index, el) {
-						name = $(el).attr("href").replace(/.*\/(.*)$/, "$1");
+						var name = $(el).text();
 						fitChecker.inner.courses.push(name);
 					});
-				}
-				if (success) {
-					success(fitChecker.inner.courses);
+					if (success) {
+						success(fitChecker.inner.courses);
+					}
 				}
 			},
 			error: function(xhr, status, exception) {
@@ -62,7 +69,7 @@ var fitChecker = function () {
 				}
 			}
 		});
-	};
+	},
 
 	/**
 	 * Processes AJAX request.
@@ -70,7 +77,7 @@ var fitChecker = function () {
 	 * @param function success Success AJAX callback
 	 * @param function error Error AJAX callback
 	 */
-	this.ajax = function(path, success, error) {
+	ajax: function(path, success, error) {
 		$.ajax({
 			async: true,
 			type: 'GET',
@@ -79,7 +86,7 @@ var fitChecker = function () {
 			'success': success,
 			'error': error
 		});
-	};
+	},
 
 	/**
 	 * Tracks event with given name and value.
@@ -87,7 +94,7 @@ var fitChecker = function () {
 	 * @param string name Event name
 	 * @param mixed value Event value
 	 */
-	this.trackGAEvent = function(name, value) {
+	trackGAEvent: function(name, value) {
 		if (fitChecker.inner.trackEnabled) {
 			try {
 				var pageTracker = _gat._getTracker("UA-325731-18");
@@ -97,9 +104,9 @@ var fitChecker = function () {
 				console.log(exception);
 			}
 		}
-	};
+	},
 
-	this.getSubjectContent = function(name, success, error) {
+	getSubjectContent: function(name, success, error) {
 		var user = fitChecker.getUsername();
 		if (user === '' && error) {
 			error("You're not logged in.");
@@ -143,9 +150,9 @@ var fitChecker = function () {
 				}
 			);
 		}
-	};
+	},
 
-	this.getUsername = function(forceRefresh, success, error) {
+	getUsername: function(forceRefresh, success, error) {
 		if (forceRefresh === true) {
 			fitChecker.ajax('',
 				function(response) {
@@ -167,21 +174,21 @@ var fitChecker = function () {
 		} else {
 			return _username;
 		}
-	};
+	},
 
-	this.hideMessage = function() {
+	hideMessage: function() {
 		$("div#status").fadeOut();
-	};
+	},
 
-	this.showMessage = function(text, type, timeout) {
+	showMessage: function(text, type, timeout) {
 		$(document).scrollTop(0);
 		$("div#status").html(text).show().removeClass().addClass(type);
 		if (timeout) {
 			setTimeout(hideMessage, timeout);
 		}
-	};
+	},
 
-	this.getJSONformattedTable = function(html) {
+	getJSONformattedTable: function(html) {
 		// Small workaround to make jQuery to parse html in string
 		html = "<div>" + html + "</div>";
 
@@ -195,7 +202,7 @@ var fitChecker = function () {
 		});
 
 		return json;
-	};
+	},
 
 	/**
 	 * Checks whether subject has inclusion or final mark and sum of all points.
@@ -205,7 +212,7 @@ var fitChecker = function () {
 	 *		sumOfPoints:	int
 	 *	}
 	 */
-	this.getSubjectImportantsFromEdux = function(html) {
+	getSubjectImportantsFromEdux: function(html) {
 		var status = null, mark, realMark, sumOfPoints = null;
 		var i, ii, next, el;
 
@@ -272,9 +279,5 @@ var fitChecker = function () {
 		}
 
 		return {'status': status, 'sumOfPoints': sumOfPoints};
-	};
+	}
 };
-
-$.fitChecker = new ($.extend(fitChecker, $.fitChecker ? $.fitChecker : {}));
-
-})(window.jQuery);
