@@ -179,12 +179,19 @@ var fitChecker = {
 	},
 
 	hideMessage: function() {
-		$("div#status").fadeOut();
+		var messages = $(".messages");
+		messages.fadeOut();
+		messages.html('');
 	},
 
 	showMessage: function(text, type, timeout) {
 		$(document).scrollTop(0);
-		$("div#status").html(text).show().removeClass().addClass(type);
+		var messages = $(".messages");
+		var messageElement = $(document.createElement('li'));
+		messageElement.addClass(type);
+		messageElement.html(text);
+		messages.append(messageElement);
+		messages.show();
 		if (timeout) {
 			setTimeout(hideMessage, timeout);
 		}
