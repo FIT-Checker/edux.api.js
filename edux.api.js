@@ -55,8 +55,10 @@ var fitChecker = {
 					}
 				} else {
 					courses.each(function(index, el) {
-						var name = $(el).text();
-						fitChecker.inner.courses.push(name);
+						var name = $(el).text().trim();
+						if (name) {
+							fitChecker.inner.courses.push(name);
+						}
 					});
 					if (success) {
 						success(fitChecker.inner.courses);
