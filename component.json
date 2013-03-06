@@ -3,6 +3,6 @@
 	"version": "0.1.0",
 	"main": "./edux.api.js",
 	"dependencies": {
-		"jquery": "1.9.*",
+		"jquery": "1.9.*"
 	}
 }
