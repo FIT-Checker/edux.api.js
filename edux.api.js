@@ -17,6 +17,16 @@ var fitChecker = {
 	},
 
 	/**
+	 * Loads username from edux.
+	 *
+	 * @param function success Success AJAX callback
+	 * @param function error Error AJAX callback
+	 */
+	getUsernameFromEdux: function(success, error) {
+		this.ajax('/start?do=backlink', success, error);
+	},
+
+	/**
 	 * Loads subjects from edux.
 	 *
 	 * @param function success Success AJAX callback
@@ -80,13 +90,25 @@ var fitChecker = {
 	 * @param function error Error AJAX callback
 	 */
 	ajax: function(path, success, error) {
+		var successCallback = function(response) {
+			if (!response) {
+				error('Edux is not available.');
+				return false;
+			}
+			success(response);
+		};
+		var errorCallback = function(xhr, status, exception) {
+			if (error) {
+				error(status);
+			}
+		};
 		$.ajax({
 			async: true,
 			type: 'GET',
 			url: fitChecker.inner.baseUrl + path,
 			timeout: 10000,
-			'success': success,
-			'error': error
+			'success': successCallback,
+			'error': errorCallback
 		});
 	},
 
