@@ -65,7 +65,7 @@ var fitChecker = {
 					}
 				} else {
 					courses.each(function(index, el) {
-						var name = $(el).text().trim();
+						var name = $(el).text().replace(/.*([A-Z]{2,3}-[A-Z0-9]{3}).*/, "$1");
 						if (name) {
 							fitChecker.inner.courses.push(name);
 						}
